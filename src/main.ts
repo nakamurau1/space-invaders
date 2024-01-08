@@ -131,9 +131,10 @@ class Grid {
   velocity: Velocity;
   invaders: Invader[];
   width: number;
+
   constructor() {
     this.position = { x: 0, y: 0 };
-    this.velocity = { x: 3, y: 0 };
+    this.velocity = { x: 1, y: 0 };
     this.invaders = [];
     const cols = Math.floor(Math.random() * 10 + 5);
     const rows = Math.floor(Math.random() * 5 + 2);
@@ -174,7 +175,7 @@ class Projectile {
     this.position = position;
     this.velocity = velocity;
 
-    this.radius = 3;
+    this.radius = 4;
   }
 
   draw() {
@@ -230,8 +231,27 @@ function animate() {
       projectile.update();
     }
   });
+
   grids.forEach((grid) => {
     grid.update();
+    grid.invaders.forEach((invader, i) => {
+      projectiles.forEach((projectile, j) => {
+        if (
+          projectile.position.y - projectile.radius <=
+            invader.position.y + invader.height &&
+          projectile.position.y + projectile.radius >= invader.position.y &&
+          projectile.position.x + projectile.radius >= invader.position.x &&
+          projectile.position.x + projectile.radius <=
+            invader.position.x + invader.width &&
+          projectile.position.y + projectile.radius >= invader.position.y
+        ) {
+          setTimeout(() => {
+            grid.invaders.splice(i, 1);
+            projectiles.splice(j, 1);
+          }, 0);
+        }
+      });
+    });
   });
 
   if (keys.ArrowLeft.pressed && player.position.x >= 0) {
@@ -291,7 +311,6 @@ addEventListener("keydown", ({ key }) => {
           velocity: { x: 0, y: -10 },
         })
       );
-      console.log(projectiles);
       break;
   }
 });
