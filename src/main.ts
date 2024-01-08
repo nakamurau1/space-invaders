@@ -1,5 +1,6 @@
 import "./style.css";
 import spaceshipUrl from "./assets/spaceship.png";
+import invaderUrl from "./assets/invader.png";
 
 const canvas = document.querySelector("canvas")!;
 const c = canvas?.getContext("2d")!;
@@ -79,6 +80,52 @@ class Player {
   }
 }
 
+class Invader {
+  position: Position = { x: 0, y: 0 };
+  velocity: Velocity = { x: 0, y: 0 };
+  width = 0;
+  height = 0;
+  image: HTMLImageElement | undefined = undefined;
+
+  constructor() {
+    this.velocity = {
+      x: 0,
+      y: 0,
+    };
+
+    const image = new Image();
+    image.src = invaderUrl;
+    image.onload = () => {
+      const scale = 1;
+      this.image = image;
+      this.width = image.width * scale;
+      this.height = image.height * scale;
+      this.position = {
+        x: canvas.width / 2 - this.width / 2,
+        y: canvas.height / 2,
+      };
+    };
+  }
+
+  draw() {
+    if (this.image) {
+      c.drawImage(
+        this.image,
+        this.position.x,
+        this.position.y,
+        this.width,
+        this.height
+      );
+    }
+  }
+
+  update() {
+    this.draw();
+    this.position.x += this.velocity.x;
+    this.position.y += this.velocity.y;
+  }
+}
+
 class Projectile {
   position: Position;
   velocity: Velocity;
@@ -114,6 +161,7 @@ class Projectile {
 
 const player = new Player();
 const projectiles: Projectile[] = [];
+const invader = new Invader();
 
 const keys = {
   ArrowLeft: {
@@ -135,6 +183,8 @@ function animate() {
 
   c.fillStyle = "black";
   c.fillRect(0, 0, canvas.width, canvas.height);
+
+  invader.update();
   player.update();
   projectiles.forEach((projectile, index) => {
     if (projectile.position.y + projectile.radius < 0) {
