@@ -87,7 +87,7 @@ class Invader {
   height = 0;
   image: HTMLImageElement | undefined = undefined;
 
-  constructor() {
+  constructor({ position }: { position: Position }) {
     this.velocity = {
       x: 0,
       y: 0,
@@ -101,8 +101,8 @@ class Invader {
       this.width = image.width * scale;
       this.height = image.height * scale;
       this.position = {
-        x: canvas.width / 2 - this.width / 2,
-        y: canvas.height / 2,
+        x: position.x,
+        y: position.y,
       };
     };
   }
@@ -119,10 +119,43 @@ class Invader {
     }
   }
 
-  update() {
+  update({ velocity }: { velocity: Velocity }) {
     this.draw();
+    this.position.x += velocity.x;
+    this.position.y += velocity.y;
+  }
+}
+
+class Grid {
+  position: Position;
+  velocity: Velocity;
+  invaders: Invader[];
+  width: number;
+  constructor() {
+    this.position = { x: 0, y: 0 };
+    this.velocity = { x: 3, y: 0 };
+    this.invaders = [];
+    const cols = Math.floor(Math.random() * 10 + 5);
+    const rows = Math.floor(Math.random() * 5 + 2);
+    this.width = cols * 30;
+    for (let x = 0; x < cols; x++) {
+      for (let y = 0; y < rows; y++) {
+        this.invaders.push(new Invader({ position: { x: x * 30, y: y * 30 } }));
+      }
+    }
+  }
+
+  update() {
     this.position.x += this.velocity.x;
     this.position.y += this.velocity.y;
+    this.velocity.y = 0;
+    if (this.position.x + this.width >= canvas.width || this.position.x < 0) {
+      this.velocity.x = -this.velocity.x;
+      this.velocity.y = 30;
+    }
+    this.invaders.forEach((invader) => {
+      invader.update({ velocity: this.velocity });
+    });
   }
 }
 
@@ -161,7 +194,7 @@ class Projectile {
 
 const player = new Player();
 const projectiles: Projectile[] = [];
-const invader = new Invader();
+const grids: Grid[] = [new Grid()];
 
 const keys = {
   ArrowLeft: {
@@ -184,7 +217,6 @@ function animate() {
   c.fillStyle = "black";
   c.fillRect(0, 0, canvas.width, canvas.height);
 
-  invader.update();
   player.update();
   projectiles.forEach((projectile, index) => {
     if (projectile.position.y + projectile.radius < 0) {
@@ -194,6 +226,9 @@ function animate() {
     } else {
       projectile.update();
     }
+  });
+  grids.forEach((grid) => {
+    grid.update();
   });
 
   if (keys.ArrowLeft.pressed && player.position.x >= 0) {
