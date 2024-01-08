@@ -7,9 +7,19 @@ const c = canvas?.getContext("2d")!;
 canvas.height = innerHeight;
 canvas.width = innerWidth;
 
+type Position = {
+  x: number;
+  y: number;
+};
+
+type Velocity = {
+  x: number;
+  y: number;
+};
+
 class Player {
-  position = { x: 0, y: 0 };
-  velocity = { x: 0, y: 0 };
+  position: Position = { x: 0, y: 0 };
+  velocity: Velocity = { x: 0, y: 0 };
   rotation = 0;
   width = 0;
   height = 0;
@@ -69,7 +79,41 @@ class Player {
   }
 }
 
+class Projectile {
+  position: Position;
+  velocity: Velocity;
+  radius: number;
+
+  constructor({
+    position,
+    velocity,
+  }: {
+    position: Position;
+    velocity: Velocity;
+  }) {
+    this.position = position;
+    this.velocity = velocity;
+
+    this.radius = 3;
+  }
+
+  draw() {
+    c.beginPath();
+    c.arc(this.position.x, this.position.y, this.radius, 0, Math.PI * 2);
+    c.fillStyle = "red";
+    c.fill();
+    c.closePath();
+  }
+
+  update() {
+    this.draw();
+    this.position.x += this.velocity.x;
+    this.position.y += this.velocity.y;
+  }
+}
+
 const player = new Player();
+const projectiles: Projectile[] = [];
 
 const keys = {
   ArrowLeft: {
@@ -92,6 +136,15 @@ function animate() {
   c.fillStyle = "black";
   c.fillRect(0, 0, canvas.width, canvas.height);
   player.update();
+  projectiles.forEach((projectile, index) => {
+    if (projectile.position.y + projectile.radius < 0) {
+      setTimeout(() => {
+        projectiles.splice(index, 1);
+      }, 0);
+    } else {
+      projectile.update();
+    }
+  });
 
   if (keys.ArrowLeft.pressed && player.position.x >= 0) {
     player.velocity.x = -5;
@@ -131,6 +184,18 @@ addEventListener("keydown", ({ key }) => {
       break;
     case "ArrowDown":
       keys.ArrowDown.pressed = true;
+      break;
+    case " ":
+      projectiles.push(
+        new Projectile({
+          position: {
+            x: player.position.x + player.width / 2,
+            y: player.position.y,
+          },
+          velocity: { x: 0, y: -10 },
+        })
+      );
+      console.log(projectiles);
       break;
   }
 });
