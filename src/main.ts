@@ -194,7 +194,7 @@ class Projectile {
 
 const player = new Player();
 const projectiles: Projectile[] = [];
-const grids: Grid[] = [new Grid()];
+const grids: Grid[] = [];
 
 const keys = {
   ArrowLeft: {
@@ -210,6 +210,9 @@ const keys = {
     pressed: false,
   },
 };
+
+let frames = 0;
+let randomInterval = Math.floor(Math.random() * 500 + 500);
 
 function animate() {
   requestAnimationFrame(animate);
@@ -252,6 +255,14 @@ function animate() {
     player.velocity.y = 0;
     player.rotation = 0;
   }
+
+  if (frames % randomInterval === 0) {
+    grids.push(new Grid());
+    frames = 0;
+    randomInterval = Math.floor(Math.random() * 500 + 500);
+  }
+
+  frames++;
 }
 
 animate();
