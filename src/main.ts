@@ -1,6 +1,8 @@
 import "./style.css";
 import spaceshipUrl from "./assets/spaceship.png";
 import invaderUrl from "./assets/invader.png";
+import invaderExplosionUrl from "./assets/invader_explosion.mp3";
+import starshipExplosionUrl from "./assets/starship_explosion.mp3";
 
 const scoreEl = document.querySelector("#scoreEl");
 const canvas = document.querySelector("canvas")!;
@@ -238,7 +240,7 @@ class InvaderProjectile {
   }
 
   draw() {
-    c.fillStyle = "white";
+    c.fillStyle = "green";
     c.fillRect(this.position.x, this.position.y, this.width, this.height);
   }
 
@@ -348,6 +350,16 @@ function createStars() {
   }
 }
 
+function playInvaderExplosionSound() {
+  const explosionSound = new Audio(invaderExplosionUrl);
+  explosionSound.play();
+}
+
+function playStarshipExplosionSound() {
+  const explosionSound = new Audio(starshipExplosionUrl);
+  explosionSound.play();
+}
+
 function createParticles(object: Object) {
   for (let i = 0; i < 15; i++) {
     particles.push(
@@ -421,7 +433,7 @@ function animate() {
       projectile.position.x + projectile.width >= player.position.x &&
       projectile.position.x <= player.position.x + player.width
     ) {
-      console.log("you loose");
+      playStarshipExplosionSound();
 
       setTimeout(() => {
         player.opacity = 0;
@@ -463,6 +475,7 @@ function animate() {
 
           setTimeout(() => {
             createParticles(invader);
+            playInvaderExplosionSound();
 
             grid.invaders.splice(i, 1);
             projectiles.splice(j, 1);
