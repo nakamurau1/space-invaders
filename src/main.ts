@@ -422,10 +422,24 @@ function createScoreLabel({ position }: { position: Position }) {
   scoreLabels.push(scoreLabel);
 }
 
+function drawGameOver() {
+  if (game.over) {
+    c.save();
+    c.fillStyle = "white";
+    c.font = "40px Arial";
+    c.textAlign = "center";
+    c.fillText("GAME OVER", canvas.width / 2, canvas.height / 2);
+    c.restore();
+  }
+}
+
 // 星を描画
 createStars();
 
 function animate() {
+  if (game.over) {
+    drawGameOver();
+  }
   if (!game.active) return;
 
   requestAnimationFrame(animate);
@@ -583,6 +597,7 @@ function animate() {
 
 animate();
 
+// Event Listeners
 addEventListener("keydown", ({ key }) => {
   if (game.over) return;
 
@@ -631,10 +646,12 @@ addEventListener("keyup", ({ key }) => {
 });
 
 // タブの可視性が変更されたときのイベント処理
-document.addEventListener("visibilitychange", () => {
+addEventListener("visibilitychange", () => {
   if (document.visibilityState === "visible") {
     // タブがアクティブなときに音楽を再生
-    if (game.active && !game.over) {
+    if (game.over) {
+      backgroundMusic.pause();
+    } else {
       backgroundMusic.play();
     }
   } else {
