@@ -344,9 +344,11 @@ const invaderProjectiles: InvaderProjectile[] = [];
 const grids: Grid[] = [];
 const particles: Particle[] = [];
 const scoreLabels: ScoreLabel[] = [];
+
+let gameStarted = false;
 let game = {
   over: false,
-  active: true,
+  active: false,
 };
 let score = 0;
 
@@ -417,6 +419,23 @@ function createParticles(object: Object) {
   }
 }
 
+function updateParticles() {
+  particles.forEach((particle, particleIndex) => {
+    if (particle.position.y - particle.radius >= canvas.height) {
+      particle.position.x = Math.random() * canvas.width;
+      particle.position.y = particle.radius;
+    }
+
+    if (particle.opacity <= 0) {
+      setTimeout(() => {
+        particles.splice(particleIndex, 1);
+      }, 0);
+    } else {
+      particle.update();
+    }
+  });
+}
+
 function createScoreLabel({ position }: { position: Position }) {
   const scoreLabel = new ScoreLabel({ x: position.x, y: position.y }, "+100");
   scoreLabels.push(scoreLabel);
@@ -434,7 +453,10 @@ function drawGameOver() {
 }
 
 // 星を描画
+c.fillStyle = "black";
+c.fillRect(0, 0, canvas.width, canvas.height);
 createStars();
+updateParticles();
 
 function animate() {
   if (game.over) {
@@ -447,20 +469,7 @@ function animate() {
   c.fillStyle = "black";
   c.fillRect(0, 0, canvas.width, canvas.height);
 
-  particles.forEach((particle, particleIndex) => {
-    if (particle.position.y - particle.radius >= canvas.height) {
-      particle.position.x = Math.random() * canvas.width;
-      particle.position.y = particle.radius;
-    }
-
-    if (particle.opacity <= 0) {
-      setTimeout(() => {
-        particles.splice(particleIndex, 1);
-      }, 0);
-    } else {
-      particle.update();
-    }
-  });
+  updateParticles();
 
   player.update();
 
@@ -599,6 +608,13 @@ animate();
 
 // Event Listeners
 addEventListener("keydown", ({ key }) => {
+  if (key === " " && !gameStarted) {
+    game.active = true;
+    gameStarted = true;
+    backgroundMusic.play();
+    animate();
+  }
+
   if (game.over) return;
 
   switch (key) {
@@ -649,9 +665,7 @@ addEventListener("keyup", ({ key }) => {
 addEventListener("visibilitychange", () => {
   if (document.visibilityState === "visible") {
     // タブがアクティブなときに音楽を再生
-    if (game.over) {
-      backgroundMusic.pause();
-    } else {
+    if (game.active && !game.over) {
       backgroundMusic.play();
     }
   } else {
