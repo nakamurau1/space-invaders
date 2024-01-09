@@ -2,6 +2,7 @@ import "./style.css";
 import spaceshipUrl from "./assets/spaceship.png";
 import invaderUrl from "./assets/invader.png";
 
+const scoreEl = document.querySelector("#scoreEl");
 const canvas = document.querySelector("canvas")!;
 const c = canvas?.getContext("2d")!;
 
@@ -307,6 +308,7 @@ let game = {
   over: false,
   active: true,
 };
+let score = 0;
 
 const keys = {
   ArrowLeft: {
@@ -454,6 +456,11 @@ function animate() {
             invader.position.x + invader.width &&
           projectile.position.y + projectile.radius >= invader.position.y
         ) {
+          score += 100;
+          if (scoreEl) {
+            scoreEl.innerHTML = score.toString();
+          }
+
           setTimeout(() => {
             createParticles(invader);
 
