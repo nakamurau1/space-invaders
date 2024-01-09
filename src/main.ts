@@ -630,17 +630,6 @@ addEventListener("keydown", ({ key }) => {
     case "ArrowDown":
       keys.ArrowDown.pressed = true;
       break;
-    case " ":
-      projectiles.push(
-        new Projectile({
-          position: {
-            x: player.position.x + player.width / 2,
-            y: player.position.y,
-          },
-          velocity: { x: 0, y: -10 },
-        })
-      );
-      break;
   }
 });
 
@@ -657,6 +646,17 @@ addEventListener("keyup", ({ key }) => {
       break;
     case "ArrowDown":
       keys.ArrowDown.pressed = false;
+      break;
+    case " ":
+      projectiles.push(
+        new Projectile({
+          position: {
+            x: player.position.x + player.width / 2,
+            y: player.position.y,
+          },
+          velocity: { x: 0, y: -10 },
+        })
+      );
       break;
   }
 });
