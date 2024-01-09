@@ -134,7 +134,7 @@ class Grid {
 
   constructor() {
     this.position = { x: 0, y: 0 };
-    this.velocity = { x: 1, y: 0 };
+    this.velocity = { x: 3, y: 0 };
     this.invaders = [];
     const cols = Math.floor(Math.random() * 10 + 5);
     const rows = Math.floor(Math.random() * 5 + 2);
@@ -232,7 +232,7 @@ function animate() {
     }
   });
 
-  grids.forEach((grid) => {
+  grids.forEach((grid, gridIndex) => {
     grid.update();
     grid.invaders.forEach((invader, i) => {
       projectiles.forEach((projectile, j) => {
@@ -248,6 +248,19 @@ function animate() {
           setTimeout(() => {
             grid.invaders.splice(i, 1);
             projectiles.splice(j, 1);
+
+            if (grid.invaders.length > 0) {
+              const firstInvader = grid.invaders[0];
+              const lastInvader = grid.invaders[grid.invaders.length - 1];
+
+              grid.width =
+                lastInvader.position.x -
+                firstInvader.position.x +
+                lastInvader.width;
+              grid.position.x = firstInvader.position.x;
+            } else {
+              grid.invaders.splice(gridIndex, 1);
+            }
           }, 0);
         }
       });
