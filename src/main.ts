@@ -124,6 +124,21 @@ class Invader {
     this.position.x += velocity.x;
     this.position.y += velocity.y;
   }
+
+  shoot(invaderProjectiles: InvaderProjectile[]) {
+    invaderProjectiles.push(
+      new InvaderProjectile({
+        position: {
+          x: this.position.x + this.width / 2,
+          y: this.position.y + this.height,
+        },
+        velocity: {
+          x: 0,
+          y: 5,
+        },
+      })
+    );
+  }
 }
 
 class Grid {
@@ -193,8 +208,40 @@ class Projectile {
   }
 }
 
+class InvaderProjectile {
+  position: Position;
+  velocity: Velocity;
+  width: number;
+  height: number;
+
+  constructor({
+    position,
+    velocity,
+  }: {
+    position: Position;
+    velocity: Velocity;
+  }) {
+    this.position = position;
+    this.velocity = velocity;
+    this.width = 3;
+    this.height = 10;
+  }
+
+  draw() {
+    c.fillStyle = "white";
+    c.fillRect(this.position.x, this.position.y, this.width, this.height);
+  }
+
+  update() {
+    this.draw();
+    this.position.x += this.velocity.x;
+    this.position.y += this.velocity.y;
+  }
+}
+
 const player = new Player();
 const projectiles: Projectile[] = [];
+const invaderProjectiles: InvaderProjectile[] = [];
 const grids: Grid[] = [];
 
 const keys = {
@@ -231,9 +278,35 @@ function animate() {
       projectile.update();
     }
   });
+  invaderProjectiles.forEach((projectile, index) => {
+    if (projectile.position.y >= canvas.height) {
+      setTimeout(() => {
+        invaderProjectiles.splice(index, 1);
+      }, 0);
+    } else {
+      projectile.update();
+    }
+
+    if (
+      projectile.position.y + projectile.height <=
+        player.position.y + player.height &&
+      projectile.position.y + projectile.height >= player.position.y &&
+      projectile.position.x + projectile.width >= player.position.x &&
+      projectile.position.x <= player.position.x + player.width
+    ) {
+      console.log("you loose");
+    }
+  });
 
   grids.forEach((grid, gridIndex) => {
     grid.update();
+
+    if (frames % 100 === 0 && grid.invaders.length > 0) {
+      grid.invaders[Math.floor(Math.random() * grid.invaders.length)].shoot(
+        invaderProjectiles
+      );
+    }
+
     grid.invaders.forEach((invader, i) => {
       projectiles.forEach((projectile, j) => {
         if (
