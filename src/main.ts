@@ -3,10 +3,14 @@ import spaceshipUrl from "./assets/spaceship.png";
 import invaderUrl from "./assets/invader.png";
 import invaderExplosionUrl from "./assets/invader_explosion.mp3";
 import starshipExplosionUrl from "./assets/starship_explosion.mp3";
+import backgroundMarsUrl from "./assets/background_mars.mp3";
 
 const scoreEl = document.querySelector("#scoreEl");
 const canvas = document.querySelector("canvas")!;
 const c = canvas?.getContext("2d")!;
+
+const backgroundMusic = new Audio(backgroundMarsUrl);
+backgroundMusic.loop = true;
 
 canvas.height = innerHeight;
 canvas.width = innerWidth;
@@ -438,6 +442,7 @@ function animate() {
       setTimeout(() => {
         player.opacity = 0;
         game.over = true;
+        backgroundMusic.pause();
       }, 0);
 
       setTimeout(() => {
@@ -575,5 +580,18 @@ addEventListener("keyup", ({ key }) => {
     case "ArrowDown":
       keys.ArrowDown.pressed = false;
       break;
+  }
+});
+
+// タブの可視性が変更されたときのイベント処理
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible") {
+    // タブがアクティブなときに音楽を再生
+    if (game.active && !game.over) {
+      backgroundMusic.play();
+    }
+  } else {
+    // タブが非アクティブなときに音楽を一時停止
+    backgroundMusic.pause();
   }
 });
