@@ -31,6 +31,7 @@ class Player {
   width = 0;
   height = 0;
   image: HTMLImageElement | undefined = undefined;
+  opacity: number;
 
   constructor() {
     this.velocity = {
@@ -38,6 +39,7 @@ class Player {
       y: 0,
     };
     this.rotation = 0;
+    this.opacity = 1;
 
     const image = new Image();
     image.src = spaceshipUrl;
@@ -56,6 +58,7 @@ class Player {
   draw() {
     if (this.image) {
       c.save();
+      c.globalAlpha = this.opacity;
       // キャンバスの原点を宇宙船の中心に移動
       c.translate(
         player.position.x + player.width / 2,
@@ -300,6 +303,10 @@ const projectiles: Projectile[] = [];
 const invaderProjectiles: InvaderProjectile[] = [];
 const grids: Grid[] = [];
 const particles: Particle[] = [];
+let game = {
+  over: false,
+  active: true,
+};
 
 const keys = {
   ArrowLeft: {
@@ -362,6 +369,8 @@ function createParticles(object: Object) {
 createStars();
 
 function animate() {
+  if (!game.active) return;
+
   requestAnimationFrame(animate);
 
   c.fillStyle = "black";
@@ -411,6 +420,17 @@ function animate() {
       projectile.position.x <= player.position.x + player.width
     ) {
       console.log("you loose");
+
+      setTimeout(() => {
+        player.opacity = 0;
+        game.over = true;
+      }, 0);
+
+      setTimeout(() => {
+        game.active = false;
+      }, 2000);
+
+      createParticles(player);
     }
   });
 
@@ -492,6 +512,8 @@ function animate() {
 animate();
 
 addEventListener("keydown", ({ key }) => {
+  if (game.over) return;
+
   switch (key) {
     case "ArrowLeft":
       keys.ArrowLeft.pressed = true;
