@@ -305,11 +305,45 @@ class Particle {
   }
 }
 
+class ScoreLabel {
+  position: Position;
+  value: string;
+  opacity: number;
+  duration: number;
+  startTime: number;
+
+  constructor(position: Position, value: string, duration = 1000) {
+    this.position = position;
+    this.value = value;
+    this.opacity = 1;
+    this.duration = duration;
+    this.startTime = Date.now();
+  }
+
+  draw() {
+    const timeElapsed = Date.now() - this.startTime;
+    if (timeElapsed < this.duration) {
+      this.opacity = 1 - timeElapsed / this.duration;
+      c.save();
+      c.globalAlpha = this.opacity;
+      c.fillStyle = "white";
+      c.font = "20px Arial";
+      c.fillText(
+        this.value,
+        this.position.x,
+        this.position.y - 20 * (timeElapsed / this.duration)
+      );
+      c.restore();
+    }
+  }
+}
+
 const player = new Player();
 const projectiles: Projectile[] = [];
 const invaderProjectiles: InvaderProjectile[] = [];
 const grids: Grid[] = [];
 const particles: Particle[] = [];
+const scoreLabels: ScoreLabel[] = [];
 let game = {
   over: false,
   active: true,
@@ -381,6 +415,11 @@ function createParticles(object: Object) {
       })
     );
   }
+}
+
+function createScoreLabel({ position }: { position: Position }) {
+  const scoreLabel = new ScoreLabel({ x: position.x, y: position.y }, "+100");
+  scoreLabels.push(scoreLabel);
 }
 
 // 星を描画
@@ -480,6 +519,7 @@ function animate() {
 
           setTimeout(() => {
             createParticles(invader);
+            createScoreLabel(invader);
             playInvaderExplosionSound();
 
             grid.invaders.splice(i, 1);
@@ -500,6 +540,13 @@ function animate() {
           }, 0);
         }
       });
+    });
+
+    scoreLabels.forEach((label, index) => {
+      label.draw();
+      if (Date.now() - label.startTime > label.duration) {
+        scoreLabels.splice(index, 1);
+      }
     });
   });
 
